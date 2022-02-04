@@ -4,9 +4,9 @@ const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const hateoasLinker = require('express-hateoas-links');
 const db = require('./knex.js');
-
+const uuid = require('uuid');
+const jwt = require('jsonwebtoken');
 const indexRouter = require('./routes/index');
-const e = require('express');
 
 const app = express();
 
@@ -42,6 +42,35 @@ app.get('/commandes', async (req, res) => {
             message: "erreur lors de la connexion à la base de données"
         });
     };
+});
+
+app.post('/commandes', async (req, res) => {
+    try{
+        let id = uuid.v4()
+        let token = jwt.sign({ nom: req.body.nom }, 'my_secret_key');
+        let commande = await db("commande").insert({
+            id: id,
+            created_at: db.raw('CURRENT_TIMESTAMP'),
+            updated_at: db.raw('CURRENT_TIMESTAMP'),
+            livraison: req.body.livraison,
+            nom: req.body.nom,
+            mail: req.body.mail,
+            montant: 0,
+            status: 1,
+            token: token,
+        })
+        let response = await db.select("nom", "mail", "livraison", "id", "token", "montant").from('commande').where('id', '=', id);
+        res.status(201).json({
+            commande: response[0]
+        });
+    }
+    catch(error){
+        res.status(500).json({
+            type: "error",
+            error: "500",
+            message: "erreur lors de la connexion à la base de données"
+        });
+    }
 });
 
 app.get('/commandes/:id', async (req, res) => {

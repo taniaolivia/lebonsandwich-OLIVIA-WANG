@@ -20,11 +20,9 @@
 `http://localhost:8080`
 
 - Connexion à la base de données :
-`
-server : iut_db
-username : iutdb
-db : iutdb
-password : pass
+  - server : iut_db
+  - username : iutdb
+  - db : iutdb
+  - password : pass
 
-`
 

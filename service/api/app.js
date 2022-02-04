@@ -6,6 +6,7 @@ const hateoasLinker = require('express-hateoas-links');
 const db = require('./knex.js');
 const uuid = require('uuid');
 const jwt = require('jsonwebtoken');
+const token = require('crypto-token');
 const indexRouter = require('./routes/index');
 
 const app = express();
@@ -45,10 +46,14 @@ app.get('/commandes', async (req, res) => {
 });
 
 app.post('/commandes', async (req, res) => {
+    let id = uuid.v4();
+    let commande;
+    let result;
+    let tokenCom = token(64);
+    //let token = jwt.sign({ nom: req.body.nom }, 'my_secret_key');
+
     try{
-        let id = uuid.v4()
-        let token = jwt.sign({ nom: req.body.nom }, 'my_secret_key');
-        let commande = await db("commande").insert({
+        commande = await db("commande").insert({
             id: id,
             created_at: db.raw('CURRENT_TIMESTAMP'),
             updated_at: db.raw('CURRENT_TIMESTAMP'),
@@ -57,11 +62,13 @@ app.post('/commandes', async (req, res) => {
             mail: req.body.mail,
             montant: 0,
             status: 1,
-            token: token,
-        })
-        let response = await db.select("nom", "mail", "livraison", "id", "token", "montant").from('commande').where('id', '=', id);
+            token: tokenCom
+        });
+
+        result = await db.select("nom", "mail", "livraison", "id", "token", "montant").from('commande').where('id', '=', id);
+        
         res.status(201).json({
-            commande: response[0]
+            commande: result[0]
         });
     }
     catch(error){
@@ -76,7 +83,9 @@ app.post('/commandes', async (req, res) => {
 app.get('/commandes/:id', async (req, res) => {
     let id = req.params.id;
     let embed = req.query.embed; 
+    let tokenn = req.query.token;
     let commande;
+    let commandeToken;
     let items;
     let result;
     
@@ -91,7 +100,7 @@ app.get('/commandes/:id', async (req, res) => {
                message: "ressource non disponible : /commandes/" + id});
         }
         else{
-            if(!embed)
+            if(!embed || !token)
             {
                 result = {
                     type: "resource",
@@ -115,7 +124,7 @@ app.get('/commandes/:id', async (req, res) => {
                     }
                 ]);
             }
-            else{
+            else if(embed){
                 
                 items = await db.select('id', 'libelle', 'tarif', 'quantite').from('item').where('command_id', '=', commande[0].id);
 
@@ -128,6 +137,34 @@ app.get('/commandes/:id', async (req, res) => {
                         date_commande: commande[0].created_at,
                         date_livraison: commande[0].livraison,
                         montant: commande[0].montant,
+                        items: items
+                    }
+                }
+                res.status(200).json(result, [
+                    {
+                        items: {
+                            href: "http://localhost:3333/commandes/" + commande[0].id + "/items"
+                        },
+                        self : {
+                            href: "http://localhost:3333/commandes/" + commande[0].id
+                        }
+                    }
+                ]);
+            }
+            else if(tokenn){
+                
+                items = await db.select('id', 'libelle', 'tarif', 'quantite').from('item').where('command_id', '=', commande[0].id);
+                commandeToken = await db.select('id', 'nom', 'mail', 'created_at', 'livraison', 'montant' ).from('commande').where('token', '=', tokenn);
+
+                result = {
+                    type: "resource",
+                    commande: {
+                        id: commandeToken[0].id,
+                        mail: commandeToken[0].mail,
+                        nom: commandeToken[0].nom,
+                        date_commande: commandeToken[0].created_at,
+                        date_livraison: commandeToken[0].livraison,
+                        montant: commandeToken[0].montant,
                         items: items
                     }
                 }

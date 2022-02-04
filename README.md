@@ -21,8 +21,8 @@
 
 - Connexion à la base de données :
   - server : iut_db
-  - username : iutdb
-  - db : iutdb
+  - username : iut_db
+  - db : iut_db
   - password : pass
 
 

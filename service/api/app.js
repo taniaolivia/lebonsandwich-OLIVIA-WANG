@@ -48,7 +48,7 @@ app.get('/commandes', async (req, res) => {
 app.post('/commandes', async (req, res) => {
     let id = uuid.v4();
     let commande;
-    let resultCom;
+    let result;
     let tokenCom = token(64);
     let items;
     let reqItem = req.body.items;
@@ -75,7 +75,7 @@ app.post('/commandes', async (req, res) => {
             id: id,
             created_at: db.raw('CURRENT_TIMESTAMP'),
             updated_at: db.raw('CURRENT_TIMESTAMP'),
-            livraison: req.body.livraison,
+            livraison: req.body.livraison.date + ' ' + req.body.livraison.heure,
             nom: req.body.nom,
             mail: req.body.mail,
             montant: montant[0].total,
@@ -83,10 +83,10 @@ app.post('/commandes', async (req, res) => {
             token: tokenCom
         });
 
-        resultCom = await db.select("nom", "mail", "livraison", "id", "token", "montant").from('commande').where('id', '=', id);
+        result = await db.select("nom", "mail", "livraison", "id", "token", "montant").from('commande').where('id', '=', id);
 
         res.status(201).json({
-            commande: resultCom[0]
+            commande: result[0]
         });
     }
     catch(error){

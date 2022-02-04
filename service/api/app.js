@@ -48,11 +48,29 @@ app.get('/commandes', async (req, res) => {
 app.post('/commandes', async (req, res) => {
     let id = uuid.v4();
     let commande;
-    let result;
+    let resultCom;
     let tokenCom = token(64);
+    let items;
+    let reqItem = req.body.items;
+    let montant;
     //let token = jwt.sign({ nom: req.body.nom }, 'my_secret_key');
 
     try{
+        items = await db("item").insert(
+            reqItem.map(
+                item => ({
+                    uri: item.uri,
+                    quantite: item.q,
+                    libelle: item.libelle,
+                    tarif: item.tarif,
+                    command_id: id
+                })
+            )    
+        );
+
+        montant = await db('item').columns([
+            db.raw('sum(tarif * quantite) as total')]).where('command_id', '=', id);
+        
         commande = await db("commande").insert({
             id: id,
             created_at: db.raw('CURRENT_TIMESTAMP'),
@@ -60,15 +78,15 @@ app.post('/commandes', async (req, res) => {
             livraison: req.body.livraison,
             nom: req.body.nom,
             mail: req.body.mail,
-            montant: 0,
+            montant: montant[0].total,
             status: 1,
             token: tokenCom
         });
 
-        result = await db.select("nom", "mail", "livraison", "id", "token", "montant").from('commande').where('id', '=', id);
-        
+        resultCom = await db.select("nom", "mail", "livraison", "id", "token", "montant").from('commande').where('id', '=', id);
+
         res.status(201).json({
-            commande: result[0]
+            commande: resultCom[0]
         });
     }
     catch(error){

@@ -69,36 +69,95 @@ router.get('/', async (req, res) => {
         }
         else if(page && size)
         {
-            commande_page = await db.select('id', 'mail', 'created_at', 'livraison', 'status', 'nom').from('commande')
-            page_total = Math.ceil(commande_page.length/size)
+            let commande_page = await db.select('id', 'mail', 'created_at', 'livraison', 'status', 'nom').from('commande')
+            let page_total = Math.ceil(commande_page.length/size)
+            let next = parseInt(page) + 1;
 
-            if(page > 0){
+            if((page > 0) && (page <= page_total)){
                 commande = await db.select('id', 'mail', 'created_at', 'livraison', 'status', 'nom').from('commande').paginate({perPage: size, currentPage: page})
 
-                result =
-                    {
-                        type: "collection",
-                        count: commande.data.length,
-                        commandes : commande.data.map(
-                            item => (
-                                {
-                                    commande: {
-                                        id: item.id,
-                                        mail: item.mail,
-                                        nom: item.nom,
-                                        created_at: item.created_at,
-                                        livraison: item.livraison,
-                                        status: item.status,
-                                        links: {
-                                            self : {
-                                                href: "http://localhost:3333/commandes/" + item.id
+                if(page == 1){
+                    result =
+                        {
+                            type: "collection",
+                            count: commande.data.length,
+                            size: size,
+                            links: {
+                                next : {
+                                    href: "http://localhost:3333/commandes/?page=" + next + "&size=" + size
+                                },
+                                prev : {
+                                    href: "http://localhost:3333/commandes/?page=" + 1 + "&size=" + size
+                                },
+                                last : {
+                                    href: "http://localhost:3333/commandes/?page=" + page_total + "&size=" + size
+                                },
+                                first : {
+                                    href: "http://localhost:3333/commandes/?page=" + 1 + "&size=" + size
+                                }
+                            },
+                            commandes : commande.data.map(
+                                item => (
+                                    {
+                                        commande: {
+                                            id: item.id,
+                                            mail: item.mail,
+                                            nom: item.nom,
+                                            created_at: item.created_at,
+                                            livraison: item.livraison,
+                                            status: item.status,
+                                            links: {
+                                                self : {
+                                                    href: "http://localhost:3333/commandes/" + item.id
+                                                }
                                             }
                                         }
                                     }
+                                ))
+                        }
+                    res.status(200).json(result)
+                }
+                else {
+                    result =
+                        {
+                            type: "collection",
+                            count: commande.data.length,
+                            size: size,
+                            links: {
+                                next: {
+                                    href: "http://localhost:3333/commandes/?page=" + next + "&size=" + size
+                                },
+                                prev: {
+                                    href: "http://localhost:3333/commandes/?page=" + (page - 1) + "&size=" + size
+                                },
+                                last: {
+                                    href: "http://localhost:3333/commandes/?page=" + page_total + "&size=" + size
+                                },
+                                first: {
+                                    href: "http://localhost:3333/commandes/?page=" + 1 + "&size=" + size
                                 }
-                            ))
-                    }
-                res.status(200).json(result)
+                            },
+                            commandes: commande.data.map(
+                                item => (
+                                    {
+                                        commande: {
+                                            id: item.id,
+                                            mail: item.mail,
+                                            nom: item.nom,
+                                            created_at: item.created_at,
+                                            livraison: item.livraison,
+                                            status: item.status,
+                                            links: {
+                                                self: {
+                                                    href: "http://localhost:3333/commandes/" + item.id
+                                                }
+                                            }
+                                        }
+                                    }
+                                ))
+                        }
+                    res.status(200).json(result)
+                }
             }
             else if(page <= 0)
             {
@@ -108,6 +167,21 @@ router.get('/', async (req, res) => {
                     {
                         type: "collection",
                         count: commande.data.length,
+                        size: size,
+                        links: {
+                            next : {
+                                href: "http://localhost:3333/commandes/?page=" + 2 + "&size=" + size
+                            },
+                            prev : {
+                                href: "http://localhost:3333/commandes/?page=" + 1 + "&size=" + size
+                            },
+                            last : {
+                                href: "http://localhost:3333/commandes/?page=" + page_total + "&size=" + size
+                            },
+                            first : {
+                                href: "http://localhost:3333/commandes/?page=" + 1 + "&size=" + size
+                            }
+                        },
                         commandes : commande.data.map(
                             item => (
                                 {
@@ -131,12 +205,27 @@ router.get('/', async (req, res) => {
             }
             else if(page > page_total)
             {
-                commande = await db.select('id', 'mail', 'created_at', 'livraison', 'status', 'nom').from('commande').paginate({perPage: page_total, currentPage: 1})
+                commande = await db.select('id', 'mail', 'created_at', 'livraison', 'status', 'nom').from('commande').paginate({perPage: size, currentPage: page_total})
                 
                 result =
                     {
                         type: "collection",
                         count: commande.data.length,
+                        size: size,
+                        links: {
+                            next : {
+                                href: "http://localhost:3333/commandes/?page=" + page_total + "&size=" + size
+                            },
+                            prev : {
+                                href: "http://localhost:3333/commandes/?page=" + 1 + "&size=" + size
+                            },
+                            last : {
+                                href: "http://localhost:3333/commandes/?page=" + page_total + "&size=" + size
+                            },
+                            first : {
+                                href: "http://localhost:3333/commandes/?page=" + 1 + "&size=" + size
+                            }
+                        },
                         commandes : commande.data.map(
                             item => (
                                 {
@@ -156,7 +245,7 @@ router.get('/', async (req, res) => {
                                 }
                             ))
                     }
-                res.status(200).json(page_total)
+                res.status(200).json(result)
             }
         }
 

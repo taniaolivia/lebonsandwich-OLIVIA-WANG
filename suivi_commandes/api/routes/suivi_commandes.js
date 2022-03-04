@@ -10,7 +10,7 @@ router.get('/', async (req, res) => {
     let result;
 
     try{
-        commande = await db.select('id', 'mail', 'created_at', 'livraison', 'status', 'nom').from('commande');
+        commande = await db.select('id', 'mail', 'created_at', 'livraison', 'status', 'nom').from('commande').orderBy('livraison', 'asc');
         result = 
         {
             type: "collection",

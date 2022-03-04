@@ -6,35 +6,65 @@ const express = require('express');
 const router = express.Router();
 
 router.get('/', async (req, res) => {
+    let s = req.query.s;
     let commande;
     let result;
 
     try{
-        commande = await db.select('id', 'mail', 'created_at', 'livraison', 'status', 'nom').from('commande').orderBy('livraison', 'asc');
-        result = 
-        {
-            type: "collection",
-            count: commande.length,
-            commandes : commande.map(
-                item => (
-                    {
-                        commande: {
-                            id: item.id,
-                            mail: item.mail,
-                            nom: item.nom,
-                            created_at: item.created_at,
-                            livraison: item.livraison,
-                            status: item.status,
-                            links: {
-                                self : {
-                                    href: "http://localhost:3333/commandes/" + item.id
+        if(!s){
+            commande = await db.select('id', 'mail', 'created_at', 'livraison', 'status', 'nom').from('commande').orderBy('livraison', 'asc');
+            result =
+                {
+                    type: "collection",
+                    count: commande.length,
+                    commandes : commande.map(
+                        item => (
+                            {
+                                commande: {
+                                    id: item.id,
+                                    mail: item.mail,
+                                    nom: item.nom,
+                                    created_at: item.created_at,
+                                    livraison: item.livraison,
+                                    status: item.status,
+                                    links: {
+                                        self : {
+                                            href: "http://localhost:3333/commandes/" + item.id
+                                        }
+                                    }
                                 }
                             }
-                        }
-                    } 
-                ))
+                        ))
+                }
+            res.status(200).json(result)
+        }else{
+            commande = await db.select('id', 'mail', 'created_at', 'livraison', 'status', 'nom').from('commande').where("status", "=", s).orderBy('livraison', 'asc');
+            result =
+                {
+                    type: "collection",
+                    count: commande.length,
+                    commandes : commande.map(
+                        item => (
+                            {
+                                commande: {
+                                    id: item.id,
+                                    mail: item.mail,
+                                    nom: item.nom,
+                                    created_at: item.created_at,
+                                    livraison: item.livraison,
+                                    status: item.status,
+                                    links: {
+                                        self : {
+                                            href: "http://localhost:3333/commandes/" + item.id
+                                        }
+                                    }
+                                }
+                            }
+                        ))
+                }
+            res.status(200).json(result)
         }
-        res.status(200).json(result)
+
     }
     catch(error){
         res.status(500).json({
@@ -136,8 +166,9 @@ router.get('/', async (req, res) => {
         });
     }
 });
+*/
 
-router.get('/:id', async (req, res) => {
+router.get('/', async (req, res) => {
     let id = req.params.id;
     let embed = req.query.embed;
     let tokenn = req.query.token;
@@ -247,7 +278,7 @@ router.get('/:id', async (req, res) => {
     };
 });
 
-
+/*
 router.put('/commandes_db/:id', async (req, res) => {
     let id = req.params.id;
     let commande;

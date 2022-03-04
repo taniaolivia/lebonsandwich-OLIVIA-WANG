@@ -10,13 +10,32 @@ router.get('/', async (req, res) => {
     let result;
 
     try{
-        commande = await db.select('id', 'mail', 'created_at', 'montant').from('commande');
-        result = {
+        commande = await db.select('id', 'mail', 'created_at', 'livraison', 'status', 'nom').from('commande');
+        result = 
+        {
             type: "collection",
             count: commande.length,
-            commandes: commande
+            commandes: 
+                [
+                    commande.map(
+                        item => ({
+                            commande: {
+                                id: item.id,
+                                mail: item.mail,
+                                nom: item.nom,
+                                created_at: item.created_at,
+                                livraison: item.livraison,
+                                status: item.status
+                            },
+                        }))],
         }
-        res.status(200).json(result);
+        res.status(200).json(result, commande.map(
+            item => ({     
+                self : {
+                    href: "http://localhost:3333/commandes/" + item.id
+                }
+            }))
+        );
     }
     catch(error){
         res.status(500).json({

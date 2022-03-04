@@ -15,27 +15,26 @@ router.get('/', async (req, res) => {
         {
             type: "collection",
             count: commande.length,
-            commandes: 
-                [
-                    commande.map(
-                        item => ({
-                            commande: {
-                                id: item.id,
-                                mail: item.mail,
-                                nom: item.nom,
-                                created_at: item.created_at,
-                                livraison: item.livraison,
-                                status: item.status
-                            },
-                        }))],
+            commandes : commande.map(
+                item => (
+                    {
+                        commande: {
+                            id: item.id,
+                            mail: item.mail,
+                            nom: item.nom,
+                            created_at: item.created_at,
+                            livraison: item.livraison,
+                            status: item.status,
+                            links: {
+                                self : {
+                                    href: "http://localhost:3333/commandes/" + item.id
+                                }
+                            }
+                        }
+                    } 
+                ))
         }
-        res.status(200).json(result, commande.map(
-            item => ({     
-                self : {
-                    href: "http://localhost:3333/commandes/" + item.id
-                }
-            }))
-        );
+        res.status(200).json(result)
     }
     catch(error){
         res.status(500).json({

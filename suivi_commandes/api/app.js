@@ -5,6 +5,7 @@ const logger = require('morgan');
 const hateoasLinker = require('express-hateoas-links');
 const indexRouter = require('./routes/index');
 const suivi_commandesRouter = require('./routes/suivi_commandes');
+const { attachPaginate } = require('knex-paginate');
 
 const app = express();
 
@@ -14,6 +15,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(hateoasLinker);
+attachPaginate();
 
 
 app.use('/', indexRouter);

@@ -7,11 +7,12 @@ const router = express.Router();
 
 router.get('/', async (req, res) => {
     let s = req.query.s;
+    let page = req.query.page;
     let commande;
     let result;
 
     try{
-        if(!s){
+        if((!s) && (!page)){
             commande = await db.select('id', 'mail', 'created_at', 'livraison', 'status', 'nom').from('commande').orderBy('livraison', 'asc');
             result =
                 {
@@ -37,13 +38,39 @@ router.get('/', async (req, res) => {
                         ))
                 }
             res.status(200).json(result)
-        }else{
+        }else if(s){
             commande = await db.select('id', 'mail', 'created_at', 'livraison', 'status', 'nom').from('commande').where("status", "=", s).orderBy('livraison', 'asc');
             result =
                 {
                     type: "collection",
                     count: commande.length,
                     commandes : commande.map(
+                        item => (
+                            {
+                                commande: {
+                                    id: item.id,
+                                    mail: item.mail,
+                                    nom: item.nom,
+                                    created_at: item.created_at,
+                                    livraison: item.livraison,
+                                    status: item.status,
+                                    links: {
+                                        self : {
+                                            href: "http://localhost:3333/commandes/" + item.id
+                                        }
+                                    }
+                                }
+                            }
+                        ))
+                }
+            res.status(200).json(result)
+        }else if(page){
+            commande = await db.select('id', 'mail', 'created_at', 'livraison', 'status', 'nom').from('commande').paginate({perPage: 10, currentPage: page})
+            result =
+                {
+                    type: "collection",
+                    count: commande.data.length,
+                    commandes : commande.data.map(
                         item => (
                             {
                                 commande: {

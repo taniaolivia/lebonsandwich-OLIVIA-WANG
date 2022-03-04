@@ -8,11 +8,12 @@ const router = express.Router();
 router.get('/', async (req, res) => {
     let s = req.query.s;
     let page = req.query.page;
+    let size = req.query.size;
     let commande;
     let result;
 
     try{
-        if((!s) && (!page)){
+        if((!s) && (!page) && (!size)){
             commande = await db.select('id', 'mail', 'created_at', 'livraison', 'status', 'nom').from('commande').orderBy('livraison', 'asc');
             result =
                 {
@@ -38,7 +39,8 @@ router.get('/', async (req, res) => {
                         ))
                 }
             res.status(200).json(result)
-        }else if(s){
+        }
+        else if(s){
             commande = await db.select('id', 'mail', 'created_at', 'livraison', 'status', 'nom').from('commande').where("status", "=", s).orderBy('livraison', 'asc');
             result =
                 {
@@ -64,32 +66,98 @@ router.get('/', async (req, res) => {
                         ))
                 }
             res.status(200).json(result)
-        }else if(page){
-            commande = await db.select('id', 'mail', 'created_at', 'livraison', 'status', 'nom').from('commande').paginate({perPage: 10, currentPage: page})
-            result =
-                {
-                    type: "collection",
-                    count: commande.data.length,
-                    commandes : commande.data.map(
-                        item => (
-                            {
-                                commande: {
-                                    id: item.id,
-                                    mail: item.mail,
-                                    nom: item.nom,
-                                    created_at: item.created_at,
-                                    livraison: item.livraison,
-                                    status: item.status,
-                                    links: {
-                                        self : {
-                                            href: "http://localhost:3333/commandes/" + item.id
+        }
+        else if(page && size)
+        {
+            commande_page = await db.select('id', 'mail', 'created_at', 'livraison', 'status', 'nom').from('commande')
+            page_total = Math.ceil(commande_page.length/size)
+
+            if(page > 0){
+                commande = await db.select('id', 'mail', 'created_at', 'livraison', 'status', 'nom').from('commande').paginate({perPage: size, currentPage: page})
+
+                result =
+                    {
+                        type: "collection",
+                        count: commande.data.length,
+                        commandes : commande.data.map(
+                            item => (
+                                {
+                                    commande: {
+                                        id: item.id,
+                                        mail: item.mail,
+                                        nom: item.nom,
+                                        created_at: item.created_at,
+                                        livraison: item.livraison,
+                                        status: item.status,
+                                        links: {
+                                            self : {
+                                                href: "http://localhost:3333/commandes/" + item.id
+                                            }
                                         }
                                     }
                                 }
-                            }
-                        ))
-                }
-            res.status(200).json(result)
+                            ))
+                    }
+                res.status(200).json(result)
+            }
+            else if(page <= 0)
+            {
+                commande = await db.select('id', 'mail', 'created_at', 'livraison', 'status', 'nom').from('commande').paginate({perPage: size, currentPage: 1})
+                
+                result =
+                    {
+                        type: "collection",
+                        count: commande.data.length,
+                        commandes : commande.data.map(
+                            item => (
+                                {
+                                    commande: {
+                                        id: item.id,
+                                        mail: item.mail,
+                                        nom: item.nom,
+                                        created_at: item.created_at,
+                                        livraison: item.livraison,
+                                        status: item.status,
+                                        links: {
+                                            self : {
+                                                href: "http://localhost:3333/commandes/" + item.id
+                                            }
+                                        }
+                                    }
+                                }
+                            ))
+                    }
+                res.status(200).json(result)
+            }
+            else if(page > page_total)
+            {
+                commande = await db.select('id', 'mail', 'created_at', 'livraison', 'status', 'nom').from('commande').paginate({perPage: page_total, currentPage: 1})
+                
+                result =
+                    {
+                        type: "collection",
+                        count: commande.data.length,
+                        commandes : commande.data.map(
+                            item => (
+                                {
+                                    commande: {
+                                        id: item.id,
+                                        mail: item.mail,
+                                        nom: item.nom,
+                                        created_at: item.created_at,
+                                        livraison: item.livraison,
+                                        status: item.status,
+                                        links: {
+                                            self : {
+                                                href: "http://localhost:3333/commandes/" + item.id
+                                            }
+                                        }
+                                    }
+                                }
+                            ))
+                    }
+                res.status(200).json(page_total)
+            }
         }
 
     }

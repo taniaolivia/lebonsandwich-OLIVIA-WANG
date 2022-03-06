@@ -2,9 +2,8 @@ const express = require('express');
 const db = require('../knex.js');
 const uuid = require('uuid');
 const Joi = require('joi');
-const token = require('crypto-token');
+const jwt = require('jsonwebtoken');
 const router = express.Router();
-
 
 router.get('/', async (req, res) => {
     let commande;
@@ -30,16 +29,15 @@ router.get('/', async (req, res) => {
 
 router.post('/', async (req, res) => {
     let id = uuid.v4();
-    let commande;
     let result;
-    let tokenCom = token(64);
     let items;
     let reqItem = req.body.items;
     let montant;
     let schema;
     let values;
-    //let token = jwt.sign({ nom: req.body.nom }, 'my_secret_key');
-
+    let commande;
+    let tokenCom = jwt.sign({nom: req.body.nom}, 'my_secret_key');
+    
     try{
         items = await db("item").insert(
             reqItem.map(
@@ -140,29 +138,51 @@ router.get('/:id', async (req, res) => {
                 message: "ressource non disponible : /commandes_db/" + id});
         }
         else{
-            if(!embed || !token)
+            if(!embed && !tokenn)
             {
-                result = {
-                    type: "resource",
-                    commande: {
-                        id: commande[0].id,
-                        mail: commande[0].mail,
-                        nom: commande[0].nom,
-                        date_commande: commande[0].created_at,
-                        date_livraison: commande[0].livraison,
-                        montant: commande[0].montant
+                if(req.header('X-lbs-token') == null)
+                {
+                    err = {
+                        Erreur: "Le token ne peut pas être null. Vous devez ajouter un token dans le header !",
                     }
+                    
+                    res.status(400).json(err);
                 }
-                res.status(200).json(result, [
-                    {
-                        items: {
-                            href: "http://localhost:3333/commandes/" + commande[0].id + "/items"
-                        },
-                        self : {
-                            href: "http://localhost:3333/commandes/" + commande[0].id
+                else{
+                    jwt.verify(req.header('X-lbs-token'), 'my_secret_key', {maxAge: 60}, async function(err, decoded) {
+                        if (err) {
+                            err = {
+                                Erreur: "Erreur lors de l'expiration token. Vous avez déjà dépassé la durée maximum du token (10 minutes).",
+                            }
+                        
+                            res.status(404).json(err);
                         }
-                    }
-                ]);
+                        else{
+                            result = {
+                                type: "resource",
+                                commande: {
+                                    id: commande[0].id,
+                                    mail: commande[0].mail,
+                                    nom: commande[0].nom,
+                                    date_commande: commande[0].created_at,
+                                    date_livraison: commande[0].livraison,
+                                    montant: commande[0].montant,
+                                    status: 'ok'
+                                }
+                            }
+                            res.status(200).json(result, [
+                                {
+                                    items: {
+                                        href: "http://localhost:3333/commandes/" + commande[0].id + "/items"
+                                    },
+                                    self : {
+                                        href: "http://localhost:3333/commandes/" + commande[0].id
+                                    }
+                                }
+                            ]);
+                        }
+                    });
+                }
             }
             else if(embed){
 
@@ -193,31 +213,42 @@ router.get('/:id', async (req, res) => {
             }
             else if(tokenn){
 
-                items = await db.select('id', 'libelle', 'tarif', 'quantite').from('item').where('command_id', '=', commande[0].id);
-                commandeToken = await db.select('id', 'nom', 'mail', 'created_at', 'livraison', 'montant' ).from('commande').where('token', '=', tokenn);
-
-                result = {
-                    type: "resource",
-                    commande: {
-                        id: commandeToken[0].id,
-                        mail: commandeToken[0].mail,
-                        nom: commandeToken[0].nom,
-                        date_commande: commandeToken[0].created_at,
-                        date_livraison: commandeToken[0].livraison,
-                        montant: commandeToken[0].montant,
-                        items: items
-                    }
-                }
-                res.status(200).json(result, [
-                    {
-                        items: {
-                            href: "http://localhost:3333/commandes/" + commande[0].id + "/items"
-                        },
-                        self : {
-                            href: "http://localhost:3333/commandes/" + commande[0].id
+                jwt.verify(tokenn, 'my_secret_key', {maxAge: 600}, async function(err, decoded) {
+                    if (err) {
+                        err = {
+                          Erreur: "Erreur lors de l'expiration token. Vous avez déjà dépassé la durée maximum du token (10 minutes).",
                         }
+                      
+                        res.status(404).json(err);
                     }
-                ]);
+                    else{
+                        items = await db.select('id', 'libelle', 'tarif', 'quantite').from('item').where('command_id', '=', commande[0].id);
+                        commandeToken = await db.select('id', 'nom', 'mail', 'created_at', 'livraison', 'montant' ).from('commande').where('token', '=', tokenn);
+
+                        result = {
+                            type: "resource",
+                            commande: {
+                                id: commandeToken[0].id,
+                                mail: commandeToken[0].mail,
+                                nom: commandeToken[0].nom,
+                                date_commande: commandeToken[0].created_at,
+                                date_livraison: commandeToken[0].livraison,
+                                montant: commandeToken[0].montant,
+                                items: items
+                            }
+                        }
+                        res.status(200).json(result, [
+                            {
+                                items: {
+                                    href: "http://localhost:3333/commandes/" + commande[0].id + "/items"
+                                },
+                                self : {
+                                    href: "http://localhost:3333/commandes/" + commande[0].id
+                                }
+                            }
+                        ]);
+                    }
+                });
             }
         }
     }

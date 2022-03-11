@@ -13,6 +13,16 @@
 - Installer les dépendances:
 `docker-compose run <nom-du-service> npm i`
 
+
+## Directus
+- Consulter les catalogue:
+`http://localhost:8055/items/Sandwich`
+
+- Conculter les catégorie
+`http://localhost:8055/items/Category`
+
+
+
 ## Étapes
 
 - Lancer un docker :

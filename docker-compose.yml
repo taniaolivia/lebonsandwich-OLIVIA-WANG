@@ -47,13 +47,13 @@ services:
     ports:
       - 8055:8055
     volumes:
-      - ./uploads:/directus/uploads
+      - ./catalogue:/directus/catalogue
     networks:
       - directus
     depends_on:
       - cache
       - commandes_db
-    env_file: uploads/.env
+    env_file: catalogue/.env
 
     environment:
       KEY: '255d861b-5ea1-5996-9aa3-922530ec40b1'

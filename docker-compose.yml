@@ -35,6 +35,37 @@ services:
     networks:
       - lbs
 
+  cache:
+    container_name: cache
+    image: redis:6
+    networks:
+      - directus
+
+  directus:
+    container_name: directus
+    image: directus/directus:latest
+    ports:
+      - 8055:8055
+    volumes:
+      - ./uploads:/directus/uploads
+    networks:
+      - directus
+    depends_on:
+      - cache
+      - commandes_db
+    env_file: uploads/.env
+
+    environment:
+      KEY: '255d861b-5ea1-5996-9aa3-922530ec40b1'
+      SECRET: '6116487b-cda1-52c2-b5b5-c8022c45e263'
+      CACHE_ENABLED: 'true'
+      CACHE_STORE: 'redis'
+      CACHE_REDIS: 'redis://cache:6379'
+
+      ADMIN_EMAIL: 'admin@example.com'
+      ADMIN_PASSWORD: 'admin'
+
+
   lbs_adminer:
     container_name: lbs_adminer
     image: adminer
@@ -59,3 +90,4 @@ services:
 networks:
   lbs:
     driver: bridge
+  directus:

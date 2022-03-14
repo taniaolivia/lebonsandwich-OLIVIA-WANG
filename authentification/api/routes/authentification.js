@@ -31,7 +31,7 @@ router.post('/', async (req, res) => {
                 })
             }
             else{
-                token = jwt.sign({nom}, 'my_secret_key', {algorithm: 'HS256'});
+                token = jwt.sign({nom}, 'my_secret_key', {algorithm: 'HS256', expiresIn: '600s'});
     
                 return res.status(201).json({
                     token: token

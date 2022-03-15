@@ -1,0 +1,67 @@
+[
+	{
+		"id": 1,
+		"nom": "la mer",
+		"description": "les meilleurs sandwichs de la mer, à découvrir !",
+		"type_pain": null,
+		"image": null,
+		"prix": null,
+		"categories": [
+			{
+				"id": "1"
+			}
+		]
+	},
+	{
+		"id": 2,
+		"nom": "le forestier",
+		"description": "un jambon authentique, des noisettes croquantes, une salade fraîche et un beurre délicatement salé.",
+		"type_pain": null,
+		"image": null,
+		"prix": null,
+		"categories": [
+			{
+				"id": "1"
+			}
+		]
+	},
+	{
+		"id": 3,
+		"nom": "le bucheron",
+		"description": "Dégustez le \"Sandwich bûcheron\" avec sa demi-baguette Graines Poulaillon garnie de fines lamelles de cornichons, de délicates tranches d'emmental et de roulade à la pistache, nappée de sa sauce moutarde.",
+		"type_pain": null,
+		"image": null,
+		"prix": null,
+		"categories": [
+			{
+				"id": "1"
+			}
+		]
+	},
+	{
+		"id": 4,
+		"nom": "les fajitas poulet",
+		"description": "Sandwichs fajita poulet. Sandwich Fajita Poulet. Poulet mariné, poivron, oignon, cheddar au pain de tortilla à la mayonnaise",
+		"type_pain": null,
+		"image": null,
+		"prix": null,
+		"categories": [
+			{
+				"id": "1"
+			}
+		]
+	},
+	{
+		"id": 5,
+		"nom": "le panini",
+		"description": "Le panini est un type de sandwich servi chaud après avoir été grillé entre les deux plaques d'une presse à sandwich.",
+		"type_pain": null,
+		"image": null,
+		"prix": null,
+		"categories": [
+			{
+				"id": "1"
+			}
+		]
+	}
+]

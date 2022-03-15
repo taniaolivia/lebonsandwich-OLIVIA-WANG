@@ -21,18 +21,20 @@
 - Conculter les catégorie
 `http://localhost:8055/items/category`
 
+- Connexion à la directus :
+  - ADMIN_EMAIL : admin@example.com
+  - ADMIN_PASSWORD : admin
 
 
 ## Étapes
-
 - Lancer un docker :
+`docker-compose pull`
+`docker-compose up -d`
+`docker-compose down`
 `docker-compose up`
 
 - Consulter les commandes :
 `http://localhost:3333`
-
-- Consulter les suivis de commandes :
-`http://localhost:3334`
 
 - Consulter la base de données :
 `http://localhost:8080`
@@ -40,14 +42,14 @@
 - Consulter les catalogues - CMS Headless  :
 `http://localhost:8055`
 
-- L'authentification get token :
-`http://localhost:3335/auth`
+- Consulter le suivi des commandes avec l'authentification :
+`http://localhost:3334/suivi/commandes`
 
-- L'authentification sign up :
-`http://localhost:3335/auth/signup`
+- get token sign up avec l'authentification :
+`http://localhost:3334/auth/signup`
 
-- L'authentification sign in :
-`http://localhost:3335/auth/signin`
+- get token sign in avec l'authentification :
+`http://localhost:3334/auth/signin`
 
 - Connexion à la base de données :
   - server : commandes_db

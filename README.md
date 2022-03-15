@@ -16,10 +16,10 @@
 
 ## Directus
 - Consulter les catalogue:
-`http://localhost:8055/items/Sandwich`
+`http://localhost:8055/items/sandwich`
 
 - Conculter les catégorie
-`http://localhost:8055/items/Category`
+`http://localhost:8055/items/category`
 
 
 

@@ -1,4 +1,22 @@
 services:
+  authentification:
+    container_name: authentification
+    image: node:lts
+    env_file: authentification/.env
+    working_dir: /usr/src/app
+    volumes:
+      - ./authentification/api:/usr/src/app
+    # ports:
+    #   - 3335:3000
+    #command: bash -c "npm i && npm start"
+    command: npm run watch
+    depends_on:
+      - commandes_db
+    links:
+      - commandes_db
+    networks:
+      - lbs
+
   commandes:
     container_name: commandes
     image: node:lts
@@ -24,14 +42,36 @@ services:
     working_dir: /usr/src/app
     volumes:
       - ./suivi_commandes/api:/usr/src/app
-    ports:
-      - 3334:3000
+    # ports:
+    #   - 3334:3000
     #command: bash -c "npm i && npm start"
     command: npm run watch
     depends_on:
       - commandes_db
     links:
       - commandes_db
+    networks:
+      - lbs
+
+  api_gateway:
+    container_name: api_gateway
+    image: node:lts
+    env_file: api_gateway/.env
+    working_dir: /usr/src/app
+    volumes:
+      - ./api_gateway/api:/usr/src/app
+    ports:
+      - 3334:3000
+    #command: bash -c "npm i && npm start"
+    command: npm run watch
+    depends_on:
+      - commandes_db
+      - authentification
+      - suivi_commandes
+    links:
+      - commandes_db
+      - suivi_commandes
+      - authentification
     networks:
       - lbs
 

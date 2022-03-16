@@ -15,7 +15,7 @@
 
 
 ## Directus
-- Consulter les catalogue:
+- Consulter les sandwich:
 `http://localhost:8055/items/sandwich`
 
 - Conculter les catégorie

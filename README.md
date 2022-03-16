@@ -54,8 +54,7 @@
 `http://localhost:8055`
 
 
-
-## CONNEXION
+### CONNEXION
 - Connexion à la base de données :
   - server : commandes_db
   - username : commandes_db

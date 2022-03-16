@@ -28,7 +28,7 @@ CREATE TABLE `commande` (
   `mail` varchar(256) NOT NULL,
   `montant` decimal(8,2) DEFAULT NULL,
   `remise` decimal(8,2) DEFAULT NULL,
-  `token` varchar(128) DEFAULT NULL,
+  `token` varchar(256) DEFAULT NULL,
   `client_id` int(11) DEFAULT NULL,
   `ref_paiement` varchar(128) DEFAULT NULL,
   `date_paiement` datetime DEFAULT NULL,

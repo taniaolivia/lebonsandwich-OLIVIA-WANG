@@ -3,6 +3,7 @@ const db = require('../knex.js');
 const uuid = require('uuid');
 const Joi = require('joi');
 const jwt = require('jsonwebtoken');
+const { json } = require('express');
 const router = express.Router();
 
 router.get('/', async (req, res) => {
@@ -31,12 +32,14 @@ router.post('/', async (req, res) => {
     let id = uuid.v4();
     let result;
     let items;
-    let reqItem = req.body.items;
+    let reqItem = JSON.parse(req.headers.items);
     let montant;
     let schema;
     let values;
     let commande;
-    let tokenCom = jwt.sign({nom: req.body.nom}, 'my_secret_key');
+    let nom = req.headers.nom;
+    let livraison = JSON.parse(req.headers.livraison);
+    let tokenCom = jwt.sign({nom}, 'my_secret_key', {algorithm: 'HS256', expiresIn: '20s'});
     
     try{
         items = await db("item").insert(
@@ -54,6 +57,7 @@ router.post('/', async (req, res) => {
         montant = await db('item').columns([
             db.raw('sum(tarif * quantite) as total')]).where('command_id', '=', id);
 
+
         schema = Joi.object({
             nom: Joi.string()
                 .min(1)
@@ -65,22 +69,21 @@ router.post('/', async (req, res) => {
 
             livraison: Joi.date().greater('now').iso().required(),
 
-            items: Joi.array()
-                .items({
+            /*items: Joi.array()
+                .items(validator.object({
                     uri: Joi.string().required(),
                     quantite: Joi.number().required(),
                     libelle: Joi.string().required(),
                     tarif: Joi.number().required(),
                     command_id: Joi.string().required(),
-                })
-
+                }))*/
         });
 
         values = await schema.validateAsync({
-            nom: req.body.nom,
-            mail: req.body.mail,
-            livraison: req.body.livraison.date + ' ' + req.body.livraison.heure,
-            items: reqItem.map(
+            nom: req.headers.nom,
+            mail: req.headers.mail,
+            livraison: livraison.date + ' ' + livraison.heure,
+            /*items: reqItem.map(
                 item => ({
                     uri: item.uri,
                     quantite: item.q,
@@ -88,23 +91,23 @@ router.post('/', async (req, res) => {
                     tarif: item.tarif,
                     command_id: id
                 })
-            )
+            )*/
         });
-
-        commande = await db("commande").insert({
+       
+        commande = await db('commande').insert({
             id: id,
             created_at: db.raw('CURRENT_TIMESTAMP'),
             updated_at: db.raw('CURRENT_TIMESTAMP'),
-            livraison: req.body.livraison.date + ' ' + req.body.livraison.heure,
-            nom: req.body.nom,
-            mail: req.body.mail,
+            livraison: livraison.date + ' ' + livraison.heure,
+            nom: req.headers.nom,
+            mail: req.headers.mail,
             montant: montant[0].total,
             status: 1,
             token: tokenCom
         });
-
+        
         result = await db.select("nom", "mail", "livraison", "id", "token", "montant").from('commande').where('id', '=', id);
-
+       
         res.status(201).json({
             commande: result[0]
         });
@@ -140,7 +143,7 @@ router.get('/:id', async (req, res) => {
         else{
             if(!embed && !tokenn)
             {
-                if(req.header('X-lbs-token') == null)
+                /*if(req.header('X-lbs-token') == null)
                 {
                     err = {
                         Erreur: "Le token ne peut pas être null. Vous devez ajouter un token dans le header !",
@@ -157,7 +160,7 @@ router.get('/:id', async (req, res) => {
                         
                             res.status(404).json(err);
                         }
-                        else{
+                        else{*/
                             result = {
                                 type: "resource",
                                 commande: {
@@ -180,9 +183,9 @@ router.get('/:id', async (req, res) => {
                                     }
                                 }
                             ]);
-                        }
+                        /*}
                     });
-                }
+                }*/
             }
             else if(embed){
 
@@ -266,6 +269,7 @@ router.put('/:id', async (req, res) => {
     let id = req.params.id;
     let commande;
     let update;
+    let livraison = JSON.parse(req.headers.livraison);
 
     try{
         commande = await db.select('id', 'nom', 'mail', 'created_at', 'livraison', 'montant' ).from('commande').where('id', '=', id);
@@ -279,9 +283,9 @@ router.put('/:id', async (req, res) => {
         }
         else{
             update = await db.select('id', 'nom', 'mail', 'created_at', 'livraison', 'montant' ).from('commande').where('id', '=', id).update({
-                nom: req.body.nom,
-                mail: req.body.mail,
-                livraison: req.body.livraison
+                nom: req.headers.nom,
+                mail: req.headers.mail,
+                livraison: livraison.date + ' ' + livraison.heure
             });
             res.status(204).json('success');
         }

@@ -23,8 +23,6 @@ services:
     working_dir: /usr/src/app
     volumes:
       - ./commandes/api:/usr/src/app
-    ports:
-      - 3333:3000
     #command: bash -c "npm i && npm start"
     command: npm run watch
     depends_on:
@@ -52,15 +50,15 @@ services:
       - lbs
 
 
-  api_gateway:
-    container_name: api_gateway
+  api_gateway_back:
+    container_name: api_gateway_back
     image: node:lts
-    env_file: api_gateway/.env
+    env_file: api_gateway_back/.env
     working_dir: /usr/src/app
     volumes:
-      - ./api_gateway/api:/usr/src/app
+      - ./api_gateway_back/api:/usr/src/app
     ports:
-      - 3334:3000
+      - 3333:3000
     #command: bash -c "npm i && npm start"
     command: npm run watch
     depends_on:
@@ -75,6 +73,32 @@ services:
       - lbs
 
 
+  api_gateway_front:
+    container_name: api_gateway_front
+    image: node:lts
+    env_file: api_gateway_front/.env
+    working_dir: /usr/src/app
+    volumes:
+      - ./api_gateway_front/api:/usr/src/app
+    ports:
+      - 3334:3000
+    #command: bash -c "npm i && npm start"
+    command: npm run watch
+    depends_on:
+      - commandes_db
+      - directus_db
+      - directus
+      - commandes
+    links:
+      - commandes_db
+      - directus_db
+      - directus
+      - commandes
+    networks:
+      - lbs
+      - directus
+
+
   directus_db:
     container_name: directus_db
     image: postgis/postgis:13-master
@@ -87,13 +111,12 @@ services:
       POSTGRES_PASSWORD: 'directus'
       POSTGRES_DB: 'directus'
 
+
   cache:
     container_name: cache
     image: redis:6
     networks:
       - directus
-
-
 
 
   lbs_adminer:
@@ -118,11 +141,12 @@ services:
     networks:
       - lbs
 
+
   directus:
     container_name: directus
     image: directus/directus:latest
-    ports:
-      - 8055:8055
+    #ports:
+    #  - 8055:8055
     volumes:
       - ./catalogue:/directus/catalogue
     networks:
@@ -130,7 +154,6 @@ services:
     depends_on:
       - cache
       - directus_db
-
     environment:
       KEY: '255d861b-5ea1-5996-9aa3-922530ec40b1'
       SECRET: '6116487b-cda1-52c2-b5b5-c8022c45e263'

@@ -6,18 +6,20 @@
 
 
 ## Étapes
+### SERVICES
 - Installer les dépendances de tous les services:
-`docker-compose run authentification npm i`
-`docker-compose run commandes npm i`
-`docker-compose run suivi_commandes npm i`
-`docker-compose run api_gatewayback npm i`
-`docker-compose run api_gatewayfront npm i`
+  - `docker-compose run authentification npm i`
+  - `docker-compose run commandes npm i`
+  - `docker-compose run suivi_commandes npm i`
+  - `docker-compose run api_gatewayback npm i`
+  - `docker-compose run api_gatewayfront npm i`
 
+### DOCKER
 - Lancer un docker :
-`docker-compose pull`
-`docker-compose up -d`
-`docker-compose down`
-`docker-compose up`
+  - `docker-compose pull`
+  - `docker-compose up -d`
+  - `docker-compose down`
+  - `docker-compose up`
 
 
 ### API GATEWAY BACK OFFICE

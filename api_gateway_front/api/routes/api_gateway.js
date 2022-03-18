@@ -30,10 +30,57 @@ router.get('/sandwich', async (req, res, next) => {
     }
 });
 
+router.post('/sandwich', async (req, res, next) => {
+    try{
+        let categories = req.body.categories;
+        let reqCateg = categories.map(
+            item => ({
+                id: item.id
+            })
+        );
+        let data = {
+            id: req.body.id,
+            nom: req.body.nom,
+            description: req.body.description,
+            type_pain: req.body.type_pain,
+            image: req.body.image,
+            categories: reqCateg,
+            prix: req.body.prix
+        }
+        console.log(data);
+        const result = await axios
+            .post('http://directus:8055/items/sandwich', data);
+        
+        res.json(result.data);
+    }
+    catch(error){
+        console.log(error)
+        next(error);
+    }
+});
+
 router.get('/category', async (req, res, next) => {
     try{
         const result = await axios
             .get('http://directus:8055/items/category');
+        
+        res.json(result.data);
+    }
+    catch(error){
+        console.log(error)
+        next(error);
+    }
+});
+
+router.post('/category', async (req, res, next) => {
+    try{
+        let data = {
+            id: req.body.id,
+            nom: req.body.nom,
+            description: req.body.description
+        }
+        const result = await axios
+            .post('http://directus:8055/items/category', data);
         
         res.json(result.data);
     }

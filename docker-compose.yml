@@ -19,6 +19,8 @@ services:
   commandes:
     container_name: commandes
     image: node:lts
+    ports:
+      - 3335:3000
     env_file: commandes/.env
     working_dir: /usr/src/app
     volumes:
@@ -145,8 +147,8 @@ services:
   directus:
     container_name: directus
     image: directus/directus:latest
-    #ports:
-    #  - 8055:8055
+    ports:
+      - 8055:8055
     volumes:
       - ./catalogue:/directus/catalogue
     networks:

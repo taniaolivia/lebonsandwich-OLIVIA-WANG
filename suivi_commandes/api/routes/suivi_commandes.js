@@ -6,14 +6,11 @@ const express = require('express');
 const router = express.Router();
 
 router.get('/', async (req, res) => {
-    let s = req.query.s;
-    let page = req.query.page;
-    let size = req.query.size;
     let commande;
     let result;
-
+   
     try{
-        if((!s) && (!page) && (!size)){
+        if(req.headers.data == null){
             commande = await db.select('id', 'mail', 'created_at', 'livraison', 'status', 'nom').from('commande').orderBy('livraison', 'asc');
             result =
                 {
@@ -40,8 +37,8 @@ router.get('/', async (req, res) => {
                 }
             res.status(200).json(result)
         }
-        else if(s){
-            commande = await db.select('id', 'mail', 'created_at', 'livraison', 'status', 'nom').from('commande').where("status", "=", s).orderBy('livraison', 'asc');
+        else if(JSON.parse(req.headers.data).s){
+            commande = await db.select('id', 'mail', 'created_at', 'livraison', 'status', 'nom').from('commande').where("status", "=", JSON.parse(req.headers.data).s).orderBy('livraison', 'asc');
             result =
                 {
                     type: "collection",
@@ -67,16 +64,19 @@ router.get('/', async (req, res) => {
                 }
             res.status(200).json(result)
         }
-        else if(page && size)
+        else if(JSON.parse(req.headers.data).page && JSON.parse(req.headers.data).size)
         {
+            let page = JSON.parse(req.headers.data).page;
+            let size = JSON.parse(req.headers.data).size;
             let commande_page = await db.select('id', 'mail', 'created_at', 'livraison', 'status', 'nom').from('commande')
             let page_total = Math.ceil(commande_page.length/size)
             let next = parseInt(page) + 1;
-
+        
             if((page > 0) && (page <= page_total)){
                 commande = await db.select('id', 'mail', 'created_at', 'livraison', 'status', 'nom').from('commande').paginate({perPage: size, currentPage: page})
-
+                
                 if(page == 1){
+                   
                     result =
                         {
                             type: "collection",
@@ -162,7 +162,7 @@ router.get('/', async (req, res) => {
             else if(page <= 0)
             {
                 commande = await db.select('id', 'mail', 'created_at', 'livraison', 'status', 'nom').from('commande').paginate({perPage: size, currentPage: 1})
-                
+               
                 result =
                     {
                         type: "collection",
@@ -206,7 +206,7 @@ router.get('/', async (req, res) => {
             else if(page > page_total)
             {
                 commande = await db.select('id', 'mail', 'created_at', 'livraison', 'status', 'nom').from('commande').paginate({perPage: size, currentPage: page_total})
-                
+               
                 result =
                     {
                         type: "collection",

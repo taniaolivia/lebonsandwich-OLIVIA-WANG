@@ -9,9 +9,34 @@ const axios = require('axios');
 
 
 router.get('/suivi/commandes', auth, async (req, res, next) => {
+    let s = req.query.s;
+    let page = req.query.page;
+    let size = req.query.size;
+    let data = "";
+    if(page && !s && !size)
+    {
+        data = {page : page};
+    }
+    else if(s && !page && !size)
+    {
+        data = {s : s};
+    }
+    else if(!s && page && size)
+    {
+        data = { page: page, size: size };
+    }
+    else if(!s && !page && !size)
+    {
+        data = null;
+    }
     try{
         const result = await axios
-            .get('http://suivi_commandes:3000/suivi_commandes');
+            .get('http://suivi_commandes:3000/suivi_commandes',
+            {
+                headers: {
+                    data: JSON.stringify(data)
+                }
+            });
         
         res.json(result.data);
     }

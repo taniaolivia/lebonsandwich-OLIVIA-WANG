@@ -61,10 +61,10 @@ Vous pouvez trouver les fichiers .json dans le dossier `directus_json` si vous v
 `http://localhost:3334/suivi/commandes`
 
 - get token sign up avec l'authentification :
-`http://localhost:3334/auth/signup`
+`http://localhost:3333/auth/signup`
 
 - get token sign in avec l'authentification :
-`http://localhost:3334/auth/signin`
+`http://localhost:3333/auth/signin`
 
 
 ### API GATEWAY FRONT OFFICE
